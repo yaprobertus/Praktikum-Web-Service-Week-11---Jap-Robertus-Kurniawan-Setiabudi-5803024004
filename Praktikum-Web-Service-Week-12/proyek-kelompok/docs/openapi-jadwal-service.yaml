@@ -1,0 +1,102 @@
+openapi: 3.0.3
+info:
+  title: Jadwal Service (Proyek Kelompok - Reservasi Tiket Kereta)
+  version: 1.0.0
+  description: Pemilik data perjalanan dan status 40 kursi per perjalanan. Dokumentasi untuk endpoint publik (diakses lewat gateway dengan prefix /jadwal).
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: Jadwal
+paths:
+  /:
+    get:
+      tags: [Jadwal]
+      summary: Daftar semua perjalanan beserta jumlah kursi
+      responses:
+        '200':
+          description: Berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service: { type: string, example: jadwal-service }
+                  jumlah: { type: integer, example: 3 }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Perjalanan' }
+  /{id}:
+    get:
+      tags: [Jadwal]
+      summary: Detail satu perjalanan
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, example: KA-001 }
+      responses:
+        '200':
+          description: Berhasil
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Perjalanan' }
+        '404':
+          description: Perjalanan tidak ditemukan
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /{id}/kursi:
+    get:
+      tags: [Jadwal]
+      summary: Peta 40 kursi (AVAILABLE / LOCKED / BOOKED)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, example: KA-001 }
+      responses:
+        '200':
+          description: Berhasil
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PetaKursi' }
+        '404':
+          description: Perjalanan tidak ditemukan
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+components:
+  schemas:
+    Perjalanan:
+      type: object
+      properties:
+        id: { type: string, example: KA-001 }
+        nama: { type: string, example: Argo Bromo Anggrek }
+        asal: { type: string, example: Jakarta Gambir }
+        tujuan: { type: string, example: Surabaya Pasarturi }
+        berangkat: { type: string, format: date-time }
+        tiba: { type: string, format: date-time }
+        kelas: { type: string, example: Eksekutif }
+        harga: { type: integer, example: 620000 }
+        kursiTersedia: { type: integer, example: 40 }
+        kursiTerkunci: { type: integer, example: 0 }
+        kursiTerjual: { type: integer, example: 0 }
+    Kursi:
+      type: object
+      properties:
+        kode: { type: string, example: 1A }
+        status: { type: string, enum: [AVAILABLE, LOCKED, BOOKED] }
+    PetaKursi:
+      type: object
+      properties:
+        perjalananId: { type: string, example: KA-001 }
+        tersedia: { type: integer, example: 40 }
+        terkunci: { type: integer, example: 0 }
+        terjual: { type: integer, example: 0 }
+        kursi:
+          type: array
+          items: { $ref: '#/components/schemas/Kursi' }
+    Error:
+      type: object
+      properties:
+        error: { type: string, example: Perjalanan tidak ditemukan }

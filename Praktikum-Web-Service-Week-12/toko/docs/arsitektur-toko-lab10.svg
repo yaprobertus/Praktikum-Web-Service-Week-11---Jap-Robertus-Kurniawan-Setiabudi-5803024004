@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="960" viewBox="0 0 1000 960" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#111111"/></marker>
+  </defs>
+  <rect width="1000" height="960" fill="#ffffff"/>
+  <text x="500" y="34" text-anchor="middle" font-size="21" font-weight="bold" fill="#000000">Arsitektur Toko dengan Message Queue RabbitMQ (Lab 10)</text>
+
+  <rect x="350" y="60" width="300" height="64" rx="10" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+  <text x="500" y="88" text-anchor="middle" font-size="16" font-weight="bold" fill="#000000">Klien</text>
+  <text x="500" y="109" text-anchor="middle" font-size="13" fill="#000000">Postman / smoke-test.js</text>
+
+  <line x1="500" y1="124" x2="500" y2="170" stroke="#111111" stroke-width="2" marker-end="url(#a)"/>
+  <text x="514" y="152" font-size="12" fill="#000000">satu alamat: localhost:8080</text>
+
+  <rect x="230" y="175" width="540" height="140" rx="12" fill="#ffffff" stroke="#000000" stroke-width="2.5"/>
+  <text x="500" y="203" text-anchor="middle" font-size="17" font-weight="bold" fill="#000000">API GATEWAY :8080</text>
+  <text x="500" y="231" text-anchor="middle" font-size="13" fill="#000000">1. Rate limit 20 request / 10 detik per IP (429)</text>
+  <text x="500" y="255" text-anchor="middle" font-size="13" fill="#000000">2. API key X-API-Key khusus /order-service (401)</text>
+  <text x="500" y="279" text-anchor="middle" font-size="13" fill="#000000">3. Routing /product-service/* dan /order-service/*</text>
+  <text x="500" y="302" text-anchor="middle" font-size="13" fill="#000000">4. Endpoint reserve diblokir dari luar (404)</text>
+
+  <line x1="360" y1="315" x2="235" y2="400" stroke="#111111" stroke-width="2" marker-end="url(#a)"/>
+  <text x="150" y="362" font-size="12" fill="#000000">/product-service/*</text>
+  <line x1="640" y1="315" x2="765" y2="400" stroke="#111111" stroke-width="2" marker-end="url(#a)"/>
+  <text x="740" y="352" font-size="12" fill="#000000">/order-service/*</text>
+
+  <rect x="60" y="405" width="340" height="150" rx="10" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+  <text x="230" y="433" text-anchor="middle" font-size="16" font-weight="bold" fill="#000000">product-service :3000</text>
+  <text x="230" y="460" text-anchor="middle" font-size="13" fill="#000000">Data milik sendiri: array products</text>
+  <text x="230" y="482" text-anchor="middle" font-size="12" fill="#000000">GET /products, GET /products/:id</text>
+  <text x="230" y="502" text-anchor="middle" font-size="12" fill="#000000">POST /products/:id/reserve (kurangi stok)</text>
+  <text x="230" y="522" text-anchor="middle" font-size="12" fill="#000000">GET /health</text>
+
+  <rect x="600" y="405" width="340" height="150" rx="10" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+  <text x="770" y="433" text-anchor="middle" font-size="16" font-weight="bold" fill="#000000">order-service :3001</text>
+  <text x="770" y="460" text-anchor="middle" font-size="13" fill="#000000">Data milik sendiri: array orders</text>
+  <text x="770" y="482" text-anchor="middle" font-size="12" fill="#000000">POST /orders, GET /orders</text>
+  <text x="770" y="502" text-anchor="middle" font-size="12" fill="#000000">Simpan salinan nama dan harga saat transaksi</text>
+  <text x="770" y="522" text-anchor="middle" font-size="12" fill="#000000">GET /health</text>
+  <text x="770" y="544" text-anchor="middle" font-size="12" font-weight="bold" fill="#000000">Publish event order.created (Lab 10)</text>
+
+  <line x1="600" y1="480" x2="400" y2="480" stroke="#111111" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#a)"/>
+  <text x="500" y="468" text-anchor="middle" font-size="12" fill="#000000">HTTP + timeout 2 detik</text>
+  <text x="500" y="500" text-anchor="middle" font-size="12" fill="#000000">POST .../reserve</text>
+  <text x="500" y="518" text-anchor="middle" font-size="12" fill="#000000">gagal: 503</text>
+
+
+  <!-- ===== Lab 10: RabbitMQ ===== -->
+
+  <rect x="360" y="610" width="600" height="250" rx="12" fill="#ffffff" stroke="#000000" stroke-width="2.5"/>
+  <text x="375" y="632" font-size="14" font-weight="bold" fill="#000000">RabbitMQ (broker) :5672, dashboard :15672</text>
+
+  <line x1="820" y1="555" x2="820" y2="657" stroke="#111111" stroke-width="2" marker-end="url(#a)"/>
+  <text x="832" y="574" font-size="12" fill="#000000">publish "order.created"</text>
+  <text x="832" y="590" font-size="12" fill="#000000">(persistent, messageId)</text>
+  <rect x="700" y="660" width="240" height="110" rx="10" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+  <text x="820" y="690" text-anchor="middle" font-size="15" font-weight="bold" fill="#000000">exchange "orders"</text>
+  <text x="820" y="712" text-anchor="middle" font-size="12" fill="#000000">tipe fanout, durable</text>
+  <text x="820" y="732" text-anchor="middle" font-size="12" fill="#000000">salin ke semua antrean terikat</text>
+  <text x="820" y="752" text-anchor="middle" font-size="12" fill="#000000">tanpa antrean = pesan hilang</text>
+
+  <rect x="380" y="655" width="200" height="60" rx="8" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+  <text x="480" y="680" text-anchor="middle" font-size="14" font-weight="bold" fill="#000000">notification-queue</text>
+  <text x="480" y="700" text-anchor="middle" font-size="12" fill="#000000">durable, Ready / Unacked</text>
+
+  <rect x="380" y="760" width="200" height="60" rx="8" fill="#ffffff" stroke="#000000" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="480" y="785" text-anchor="middle" font-size="14" font-weight="bold" fill="#000000">audit-queue (opsional)</text>
+  <text x="480" y="805" text-anchor="middle" font-size="12" fill="#000000">durable</text>
+
+  <line x1="700" y1="700" x2="582" y2="685" stroke="#111111" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="700" y1="735" x2="582" y2="785" stroke="#111111" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#a)"/>
+  <text x="640" y="672" text-anchor="middle" font-size="11" fill="#000000">bind</text>
+
+  <rect x="60" y="655" width="240" height="60" rx="8" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+  <text x="180" y="680" text-anchor="middle" font-size="14" font-weight="bold" fill="#000000">notification-service</text>
+  <text x="180" y="700" text-anchor="middle" font-size="12" fill="#000000">consumer: kirim email, lalu ack</text>
+
+  <rect x="60" y="760" width="240" height="60" rx="8" fill="#ffffff" stroke="#000000" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="180" y="785" text-anchor="middle" font-size="14" font-weight="bold" fill="#000000">audit-service (opsional)</text>
+  <text x="180" y="805" text-anchor="middle" font-size="12" fill="#000000">notification-service.js audit-queue</text>
+
+  <line x1="380" y1="685" x2="302" y2="685" stroke="#111111" stroke-width="2" marker-end="url(#a)"/>
+  <text x="331" y="676" text-anchor="middle" font-size="10" fill="#000000">consume</text>
+  <line x1="380" y1="790" x2="302" y2="790" stroke="#111111" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#a)"/>
+  <text x="331" y="781" text-anchor="middle" font-size="10" fill="#000000">consume</text>
+
+  <!-- catatan -->
+  <text x="500" y="895" text-anchor="middle" font-size="13" fill="#000000">Sinkron (Lab 09): order-service ke product-service lewat HTTP, mati = ikut gagal (503). Asinkron (Lab 10): event lewat antrean, tidak ditunggu.</text>
+  <text x="500" y="915" text-anchor="middle" font-size="13" fill="#000000">Consumer mati: pesan menumpuk (Ready) lalu diproses saat pulih. Satu antrean banyak consumer = berbagi beban; antrean berbeda = salinan sama (pub/sub).</text>
+  <text x="500" y="935" text-anchor="middle" font-size="13" fill="#000000">Pengiriman at-least-once: pesan bisa sampai dua kali, jadi consumer harus idempotent (catat messageId di penyimpanan tahan restart).</text>
+</svg>

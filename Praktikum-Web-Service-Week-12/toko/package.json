@@ -1,0 +1,22 @@
+{
+  "name": "toko-microservices",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lab 09 + Lab 10: toko microservices (product-service, order-service, gateway) dengan event order.created lewat RabbitMQ ke notification-service",
+  "scripts": {
+    "install:all": "npm install --prefix monolith && npm install --prefix product-service && npm install --prefix order-service && npm install --prefix gateway && npm install --prefix notification-service",
+    "start:all": "node scripts/start-all.js",
+    "start:notification": "node notification-service/notification-service.js",
+    "start:audit": "node notification-service/notification-service.js audit-queue",
+    "start:crash": "node notification-service/notification-service.js --crash",
+    "rabbit:up": "docker run -d --name rabbit -p 5672:5672 -p 15672:15672 rabbitmq:3-management",
+    "rabbit:down": "docker rm -f rabbit",
+    "smoke": "node smoke-test.js",
+    "kirim:order": "node kirim-order.js",
+    "uji:kegagalan": "node uji-kegagalan.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "ISC"
+}

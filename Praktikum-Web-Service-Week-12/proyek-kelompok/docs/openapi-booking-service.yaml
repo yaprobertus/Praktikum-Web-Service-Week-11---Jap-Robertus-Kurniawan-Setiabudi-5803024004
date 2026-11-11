@@ -1,0 +1,197 @@
+openapi: 3.0.3
+info:
+  title: Booking Service (Proyek Kelompok - Reservasi Tiket Kereta)
+  version: 1.0.0
+  description: Pemilik data booking. Tidak menyimpan status kursi; mengunci, mengonfirmasi, dan melepas kursi lewat jadwal-service. Lewat gateway diakses dengan prefix /booking dan wajib header X-API-Key.
+servers:
+  - url: http://localhost:3001
+tags:
+  - name: Booking
+paths:
+  /:
+    post:
+      tags: [Booking]
+      summary: Buat booking baru (mengunci kursi)
+      description: Header opsional Idempotency-Key; request ulang dengan key yang sama mengembalikan hasil yang sama (header Idempotent-Replayed bernilai true) dan tidak membuat booking ganda.
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema: { type: string, maxLength: 100 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BookingRequest' }
+      responses:
+        '201':
+          description: Booking dibuat, status MENUNGGU_PEMBAYARAN
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '400':
+          description: Input tidak valid (perjalananId, kursi, atau penumpang.nama salah; Idempotency-Key lebih dari 100 karakter)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Perjalanan tidak ditemukan
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Kursi sudah tidak tersedia
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '502':
+          description: jadwal-service tidak dapat dihubungi atau gagal mengunci kursi
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    get:
+      tags: [Booking]
+      summary: Daftar booking (opsional filter status)
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema: { type: string, enum: [MENUNGGU_PEMBAYARAN, LUNAS, DIBATALKAN, KEDALUWARSA] }
+      responses:
+        '200':
+          description: Berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service: { type: string, example: booking-service }
+                  jumlah: { type: integer, example: 1 }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Booking' }
+  /{id}:
+    get:
+      tags: [Booking]
+      summary: Detail satu booking
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, example: BK-1A2B3C4D }
+      responses:
+        '200':
+          description: Berhasil
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '404':
+          description: Booking tidak ditemukan
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /{id}/bayar:
+    post:
+      tags: [Booking]
+      summary: Bayar booking (simulasi), kursi menjadi BOOKED
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, example: BK-1A2B3C4D }
+      responses:
+        '200':
+          description: Booking LUNAS
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '404':
+          description: Booking tidak ditemukan
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Status booking tidak bisa dibayar
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '410':
+          description: Batas waktu pembayaran sudah lewat
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '502':
+          description: jadwal-service tidak dapat dihubungi atau gagal mengonfirmasi kursi
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /{id}/batal:
+    post:
+      tags: [Booking]
+      summary: Batalkan booking yang belum dibayar, kursi dilepas
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, example: BK-1A2B3C4D }
+      responses:
+        '200':
+          description: Booking DIBATALKAN
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '404':
+          description: Booking tidak ditemukan
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Status booking tidak bisa dibatalkan
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '502':
+          description: jadwal-service tidak dapat dihubungi
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+components:
+  schemas:
+    BookingRequest:
+      type: object
+      required: [perjalananId, kursi, penumpang]
+      properties:
+        perjalananId: { type: string, example: KA-001 }
+        kursi:
+          type: array
+          minItems: 1
+          maxItems: 4
+          items: { type: string, example: 1A }
+        penumpang:
+          type: object
+          required: [nama]
+          properties:
+            nama: { type: string, example: Budi Santoso }
+    Booking:
+      type: object
+      properties:
+        id: { type: string, example: BK-1A2B3C4D }
+        status: { type: string, enum: [MENUNGGU_PEMBAYARAN, LUNAS, DIBATALKAN, KEDALUWARSA] }
+        perjalananId: { type: string, example: KA-001 }
+        kursi:
+          type: array
+          items: { type: string, example: 1A }
+        penumpang:
+          type: object
+          properties:
+            nama: { type: string, example: Budi Santoso }
+        total: { type: integer, example: 1240000 }
+        batasBayar: { type: string, format: date-time }
+        lockId: { type: string, format: uuid }
+        dibuat: { type: string, format: date-time }
+        diperbarui: { type: string, format: date-time }
+        dibayar: { type: string, format: date-time }
+    Error:
+      type: object
+      properties:
+        error: { type: string, example: Booking tidak ditemukan }

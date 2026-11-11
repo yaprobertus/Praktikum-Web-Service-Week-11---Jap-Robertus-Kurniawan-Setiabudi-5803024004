@@ -1,0 +1,10 @@
+{
+  "name": "monolith",
+  "version": "1.0.0",
+  "description": "Monolit toko sederhana (produk + pesanan), titik awal Lab 09",
+  "main": "monolith.js",
+  "scripts": { "start": "node monolith.js" },
+  "engines": { "node": ">=18" },
+  "license": "ISC",
+  "dependencies": { "express": "^4.21.2" }
+}

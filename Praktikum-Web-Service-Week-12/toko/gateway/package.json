@@ -1,0 +1,20 @@
+{
+  "name": "gateway",
+  "version": "1.0.0",
+  "description": "API Gateway sederhana untuk toko (Lab 09), disalin dari Lab 08",
+  "main": "gateway.js",
+  "scripts": {
+    "start": "node gateway.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "http-proxy-middleware": "^3.0.5",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

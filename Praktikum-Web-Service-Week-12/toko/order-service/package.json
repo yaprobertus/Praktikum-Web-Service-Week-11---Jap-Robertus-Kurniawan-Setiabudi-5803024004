@@ -1,0 +1,19 @@
+{
+  "name": "order-service",
+  "version": "1.0.0",
+  "description": "Pemilik tunggal data pesanan; memanggil product-service lewat HTTP (Lab 09) dan menerbitkan event order.created ke RabbitMQ (Lab 10)",
+  "main": "order-service.js",
+  "scripts": {
+    "start": "node order-service.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "express": "^4.21.2",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
